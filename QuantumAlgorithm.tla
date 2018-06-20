@@ -48,7 +48,7 @@ vars == << S >>
 Init == (* Global variables *)
         /\ S = { << 0, 0, 1, 1 >>, << 0, 1, 0, 1 >> }
 
-Next == /\ Assert(<<0, 0, 0, 1>> \notin S, 
+Next == /\ Assert(<<0, 0, 0, 1>> \notin S,
                   "Failure of assertion at line 21, column 5.")
         /\ \E x \in S:
              \E y \in S:
