@@ -7,8 +7,8 @@ EXTENDS TLC, Naturals, Integers, Sequences
 
 variables S = << 1, 0, 0, 0 >>,
     CircuitState = << >>;
-\*    Gates = {"hadamard1", "Uf", "swap", "not1"}
-    Gates = {"hadamard1", "swap", "not1"}
+    Gates = {"hadamard1", "Uf", "swap", "not1"}
+\*    Gates = {"hadamard1", "swap", "not1"}
 
 
 define
@@ -20,8 +20,9 @@ define
     >>
     
     F(b) == 0
-    
     F2(b) == 1
+    F3(b) == b
+    F4(b) == ~b
     
     u(f(_),s) == <<
         s[1 + f(0)],
@@ -44,9 +45,9 @@ define
         s[2]
     >>
     
-    first_qubit_0(s) == (s[3] = 0) /\ (s[4] = 0)
+    first_qubit_0(s) == (s[1] /= 0) /\ (s[2] = 0)
     
-    first_qubit_1(s) == (s[1] = 0) /\ (s[2] = 0)
+    first_qubit_1(s) == (s[1] = 0) /\ (s[2] /= 0)
     
     apply(gate, f(_), state) == 
         CASE gate = "hadamard1" -> hadamard1(state)
@@ -60,12 +61,18 @@ define
         IF Len(circuit) = 0
         THEN initial_state
         ELSE compute(Tail(circuit), f, apply(Head(circuit), f, initial_state))
-    
-   
+        
+    check_all(circuit, initial_state) ==
+        first_qubit_0(compute(circuit, F, initial_state))
+        /\ first_qubit_0(compute(circuit, F2, initial_state))
+        /\ first_qubit_1(compute(circuit, F3, initial_state))
+        /\ first_qubit_1(compute(circuit, F4, initial_state))
+        
 end define;
 
 begin
 while TRUE do
+    
     with gate \in Gates do
        CircuitState := Append(CircuitState, gate);
     end with;
@@ -74,6 +81,7 @@ while TRUE do
     \* print compute(<<"swap", "hadamard1", "swap", "swap">>, F, <<1, 0, 0, 0>>);
 \*    assert Len(CircuitState) /= 2;
 \*     assert compute(CircuitState, F, S) /= << 1, 0, 1, 0>>;
+\*     assert ~check_all(CircuitState, S);
     
 end while;
 
@@ -92,8 +100,9 @@ hadamard1(s) == <<
 >>
 
 F(b) == 0
-
 F2(b) == 1
+F3(b) == b
+F4(b) == ~b
 
 u(f(_),s) == <<
     s[1 + f(0)],
@@ -116,9 +125,9 @@ not1(s) == <<
     s[2]
 >>
 
-first_qubit_0(s) == (s[3] = 0) /\ (s[4] = 0)
+first_qubit_0(s) == (s[1] /= 0) /\ (s[2] = 0)
 
-first_qubit_1(s) == (s[1] = 0) /\ (s[2] = 0)
+first_qubit_1(s) == (s[1] = 0) /\ (s[2] /= 0)
 
 apply(gate, f(_), state) ==
     CASE gate = "hadamard1" -> hadamard1(state)
@@ -133,13 +142,19 @@ compute(circuit, f(_), initial_state) ==
     THEN initial_state
     ELSE compute(Tail(circuit), f, apply(Head(circuit), f, initial_state))
 
+check_all(circuit, initial_state) ==
+    first_qubit_0(compute(circuit, F, initial_state))
+    /\ first_qubit_0(compute(circuit, F2, initial_state))
+    /\ first_qubit_1(compute(circuit, F3, initial_state))
+    /\ first_qubit_1(compute(circuit, F4, initial_state))
+
 
 vars == << S, CircuitState, Gates >>
 
 Init == (* Global variables *)
         /\ S = << 1, 0, 0, 0 >>
         /\ CircuitState = << >>
-        /\ Gates = {"hadamard1", "swap", "not1"}
+        /\ Gates = {"hadamard1", "Uf", "swap", "not1"}
 
 Next == /\ \E gate \in Gates:
              CircuitState' = Append(CircuitState, gate)
@@ -154,5 +169,6 @@ Spec == Init /\ [][Next]_vars
 
 =============================================================================
 \* Modification History
+\* Last modified Thu Jun 21 17:06:08 EDT 2018 by emanuel
 \* Last modified Thu Jun 21 16:33:23 EDT 2018 by adampalay
 \* Created Wed Jun 20 15:31:47 EDT 2018 by adampalay
