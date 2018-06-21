@@ -45,9 +45,9 @@ define
         s[2]
     >>
     
-    first_qubit_0(s) == (s[1] /= 0) /\ (s[2] = 0)
+    first_qubit_0(s) == (s[3] = 0) /\ (s[4] = 0)
     
-    first_qubit_1(s) == (s[1] = 0) /\ (s[2] /= 0)
+    first_qubit_1(s) == (s[1] = 0) /\ (s[2] = 0)
     
     apply(gate, f(_), state) == 
         CASE gate = "hadamard1" -> hadamard1(state)
@@ -128,9 +128,9 @@ not1(s) == <<
     s[2]
 >>
 
-first_qubit_0(s) == (s[1] /= 0) /\ (s[2] = 0)
+first_qubit_0(s) == (s[3] = 0) /\ (s[4] = 0)
 
-first_qubit_1(s) == (s[1] = 0) /\ (s[2] /= 0)
+first_qubit_1(s) == (s[1] = 0) /\ (s[2] = 0)
 
 apply(gate, f(_), state) ==
     CASE gate = "hadamard1" -> hadamard1(state)
@@ -176,6 +176,6 @@ Spec == Init /\ [][Next]_vars
 
 =============================================================================
 \* Modification History
+\* Last modified Thu Jun 21 18:47:05 EDT 2018 by adampalay
 \* Last modified Thu Jun 21 17:18:46 EDT 2018 by emanuel
-\* Last modified Thu Jun 21 16:33:23 EDT 2018 by adampalay
 \* Created Wed Jun 20 15:31:47 EDT 2018 by adampalay
