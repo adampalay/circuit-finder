@@ -1,10 +1,11 @@
 -------------------------- MODULE QuantumAlgorithm --------------------------
-EXTENDS TLC, Naturals, Integers
+EXTENDS TLC, Naturals, Integers, FiniteSets
 
 
 (* --algorithm qm
-\* qubit 1's state is 1, 0, meaning that it's a "1" in the 0 basis and "0" in the one
+ 
 variables S = { << 0, 0, 1, 1 >>, << 0, 1, 0, 1 >> };
+Goal = {<<0, 1, 1, 0>>, <<0, 0, 0, 1>>};
 
 define
     nand_elem(bit1, bit2) == 1 - bit1 * bit2
@@ -18,20 +19,25 @@ end define;
 
 begin
 while TRUE do
-    assert <<0, 0, 0, 1>> \notin S;
+    assert ~( Goal \subseteq S /\ S \subseteq Goal);
     with x \in S do
       with y \in S do
-        S := S \union {nand(x, y)}
+        either
+          S := S \union {nand(x, y)};
+        or 
+          S := S \ {x};
+        or
+          S := S \ {y};
+        end either;
       end with;
     end with;
-    \* assert <<0, 0, 0, 1>> \notin S;
 end while;
 
 end algorithm; *)
 
 
 \* BEGIN TRANSLATION
-VARIABLE S
+VARIABLES S, Goal
 
 (* define statement *)
 nand_elem(bit1, bit2) == 1 - bit1 * bit2
@@ -43,16 +49,20 @@ nand(row1, row2) == <<
 >>
 
 
-vars == << S >>
+vars == << S, Goal >>
 
 Init == (* Global variables *)
         /\ S = { << 0, 0, 1, 1 >>, << 0, 1, 0, 1 >> }
+        /\ Goal = {<<0, 1, 1, 0>>, <<0, 0, 0, 1>>}
 
-Next == /\ Assert(<<0, 0, 0, 1>> \notin S,
-                  "Failure of assertion at line 21, column 5.")
+Next == /\ Assert(~( Goal \subseteq S /\ S \subseteq Goal), 
+                  "Failure of assertion at line 22, column 5.")
         /\ \E x \in S:
              \E y \in S:
-               S' = (S \union {nand(x, y)})
+               \/ /\ S' = (S \union {nand(x, y)})
+               \/ /\ S' = S \ {x}
+               \/ /\ S' = S \ {y}
+        /\ Goal' = Goal
 
 Spec == Init /\ [][Next]_vars
 
@@ -60,5 +70,5 @@ Spec == Init /\ [][Next]_vars
 
 =============================================================================
 \* Modification History
-\* Last modified Wed Jun 20 15:25:41 EDT 2018 by adampalay
+\* Last modified Thu Jun 21 13:29:38 EDT 2018 by adampalay
 \* Created Mon Jun 11 15:52:06 EDT 2018 by adampalay
