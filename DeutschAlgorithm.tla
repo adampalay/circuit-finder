@@ -75,6 +75,9 @@ while TRUE do
     
     with gate \in Gates do
        CircuitState := Append(CircuitState, gate);
+       if gate = "Uf" then
+           Gates := {"hadamard1", "swap", "not1"};
+       end if;
     end with;
     \* print compute(<<"swap">>, F, <<0, 1, 0, 0>>);
     \* print compute(<<"hadamard1">>, F, <<1, 0, 0, 0>>);
@@ -157,8 +160,12 @@ Init == (* Global variables *)
         /\ Gates = {"hadamard1", "Uf", "swap", "not1"}
 
 Next == /\ \E gate \in Gates:
-             CircuitState' = Append(CircuitState, gate)
-        /\ UNCHANGED << S, Gates >>
+             /\ CircuitState' = Append(CircuitState, gate)
+             /\ IF gate = "Uf"
+                   THEN /\ Gates' = {"hadamard1", "swap", "not1"}
+                   ELSE /\ TRUE
+                        /\ Gates' = Gates
+        /\ S' = S
 
 Spec == Init /\ [][Next]_vars
 
@@ -169,6 +176,6 @@ Spec == Init /\ [][Next]_vars
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Jun 21 17:06:08 EDT 2018 by emanuel
+\* Last modified Thu Jun 21 17:18:46 EDT 2018 by emanuel
 \* Last modified Thu Jun 21 16:33:23 EDT 2018 by adampalay
 \* Created Wed Jun 20 15:31:47 EDT 2018 by adampalay
