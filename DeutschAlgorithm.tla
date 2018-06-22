@@ -7,8 +7,8 @@ EXTENDS TLC, Naturals, Integers, Sequences
 
 variables S = << 1, 0, 0, 0 >>,
     CircuitState = << >>;
-    Gates = {"hadamard1", "Uf", "swap", "not1"}
-\*    Gates = {"hadamard1", "swap", "not1"}
+    Gates = {"hadamard1", "Uf", "swap", "not1"};
+    Uf_called = 0;
 
 
 define
@@ -67,6 +67,7 @@ define
         /\ first_qubit_0(compute(circuit, F2, initial_state))
         /\ first_qubit_1(compute(circuit, F3, initial_state))
         /\ first_qubit_1(compute(circuit, F4, initial_state))
+        /\ Uf_called <= 1
         
 end define;
 
@@ -77,14 +78,9 @@ while TRUE do
        CircuitState := Append(CircuitState, gate);
        if gate = "Uf" then
            Gates := {"hadamard1", "swap", "not1"};
+           Uf_called := Uf_called + 1;
        end if;
     end with;
-    \* print compute(<<"swap">>, F, <<0, 1, 0, 0>>);
-    \* print compute(<<"hadamard1">>, F, <<1, 0, 0, 0>>);
-    \* print compute(<<"swap", "hadamard1", "swap", "swap">>, F, <<1, 0, 0, 0>>);
-\*    assert Len(CircuitState) /= 2;
-\*     assert compute(CircuitState, F, S) /= << 1, 0, 1, 0>>;
-\*     assert ~check_all(CircuitState, S);
     
 end while;
 
@@ -92,7 +88,7 @@ end while;
 
 end algorithm; *)
 \* BEGIN TRANSLATION
-VARIABLES S, CircuitState, Gates
+VARIABLES S, CircuitState, Gates, Uf_called
 
 (* define statement *)
 hadamard1(s) == <<
@@ -150,21 +146,24 @@ check_all(circuit, initial_state) ==
     /\ first_qubit_0(compute(circuit, F2, initial_state))
     /\ first_qubit_1(compute(circuit, F3, initial_state))
     /\ first_qubit_1(compute(circuit, F4, initial_state))
+    /\ Uf_called <= 1
 
 
-vars == << S, CircuitState, Gates >>
+vars == << S, CircuitState, Gates, Uf_called >>
 
 Init == (* Global variables *)
         /\ S = << 1, 0, 0, 0 >>
         /\ CircuitState = << >>
         /\ Gates = {"hadamard1", "Uf", "swap", "not1"}
+        /\ Uf_called = 0
 
 Next == /\ \E gate \in Gates:
              /\ CircuitState' = Append(CircuitState, gate)
              /\ IF gate = "Uf"
                    THEN /\ Gates' = {"hadamard1", "swap", "not1"}
+                        /\ Uf_called' = Uf_called + 1
                    ELSE /\ TRUE
-                        /\ Gates' = Gates
+                        /\ UNCHANGED << Gates, Uf_called >>
         /\ S' = S
 
 Spec == Init /\ [][Next]_vars
@@ -176,6 +175,6 @@ Spec == Init /\ [][Next]_vars
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Jun 21 18:47:05 EDT 2018 by adampalay
+\* Last modified Thu Jun 21 18:57:38 EDT 2018 by adampalay
 \* Last modified Thu Jun 21 17:18:46 EDT 2018 by emanuel
 \* Created Wed Jun 20 15:31:47 EDT 2018 by adampalay
