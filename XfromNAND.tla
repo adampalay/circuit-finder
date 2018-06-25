@@ -1,8 +1,8 @@
--------------------------- MODULE QuantumAlgorithm --------------------------
+-------------------------- MODULE XfromNAND --------------------------
 EXTENDS TLC, Naturals, Integers, FiniteSets
 
 
-(* --algorithm qm
+(* --algorithm fromNAND
  
 variables S = { << 0, 0, 1, 1 >>, << 0, 1, 0, 1 >> };
 Goal = {<<0, 1, 1, 0>>, <<0, 0, 0, 1>>};
@@ -70,5 +70,5 @@ Spec == Init /\ [][Next]_vars
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Jun 21 13:29:38 EDT 2018 by adampalay
+\* Last modified Mon Jun 25 16:46:04 EDT 2018 by adampalay
 \* Created Mon Jun 11 15:52:06 EDT 2018 by adampalay
