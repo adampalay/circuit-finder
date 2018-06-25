@@ -5,7 +5,7 @@ EXTENDS TLC, Naturals, Integers, Sequences
 
 (* --algorithm qm
 
-variables S = << 1, 0, 0, 0 >>,
+variables
     CircuitState = << >>;
     Gates = {"hadamard1", "Uf", "swap", "not1"};
     Uf_called = 0;
@@ -19,10 +19,10 @@ define
         s[2] - s[4]
     >>
     
-    F(b) == 0
-    F2(b) == 1
-    F3(b) == b
-    F4(b) == ~b
+    F_constant_0(b) == 0
+    F_constant_1(b) == 1
+    F_balanced_id(b) == b
+    F_balanced_flip(b) == 1 - b
     
     u(f(_),s) == <<
         s[1 + f(0)],
@@ -62,11 +62,14 @@ define
         THEN initial_state
         ELSE compute(Tail(circuit), f, apply(Head(circuit), f, initial_state))
         
+    \* f is balanced iff we measure the first qubit to 1
+    \* f is constant iff we measure the first qubit to 0
+    \* https://en.wikipedia.org/wiki/Deutsch%E2%80%93Jozsa_algorithm#Deutsch's_algorithm 
     check_all(circuit, initial_state) ==
-        first_qubit_0(compute(circuit, F, initial_state))
-        /\ first_qubit_0(compute(circuit, F2, initial_state))
-        /\ first_qubit_1(compute(circuit, F3, initial_state))
-        /\ first_qubit_1(compute(circuit, F4, initial_state))
+        first_qubit_0(compute(circuit, F_constant_0, initial_state))
+        /\ first_qubit_0(compute(circuit, F_constant_1, initial_state))
+        /\ first_qubit_1(compute(circuit, F_balanced_id, initial_state))
+        /\ first_qubit_1(compute(circuit, F_balanced_flip, initial_state))
         /\ Uf_called <= 1
         
 end define;
@@ -88,7 +91,7 @@ end while;
 
 end algorithm; *)
 \* BEGIN TRANSLATION
-VARIABLES S, CircuitState, Gates, Uf_called
+VARIABLES CircuitState, Gates, Uf_called
 
 (* define statement *)
 hadamard1(s) == <<
@@ -98,10 +101,10 @@ hadamard1(s) == <<
     s[2] - s[4]
 >>
 
-F(b) == 0
-F2(b) == 1
-F3(b) == b
-F4(b) == ~b
+F_constant_0(b) == 0
+F_constant_1(b) == 1
+F_balanced_id(b) == b
+F_balanced_flip(b) == 1 - b
 
 u(f(_),s) == <<
     s[1 + f(0)],
@@ -141,40 +144,41 @@ compute(circuit, f(_), initial_state) ==
     THEN initial_state
     ELSE compute(Tail(circuit), f, apply(Head(circuit), f, initial_state))
 
+
+
+
 check_all(circuit, initial_state) ==
-    first_qubit_0(compute(circuit, F, initial_state))
-    /\ first_qubit_0(compute(circuit, F2, initial_state))
-    /\ first_qubit_1(compute(circuit, F3, initial_state))
-    /\ first_qubit_1(compute(circuit, F4, initial_state))
+    first_qubit_0(compute(circuit, F_constant_0, initial_state))
+    /\ first_qubit_0(compute(circuit, F_constant_1, initial_state))
+    /\ first_qubit_1(compute(circuit, F_balanced_id, initial_state))
+    /\ first_qubit_1(compute(circuit, F_balanced_flip, initial_state))
     /\ Uf_called <= 1
 
 
-vars == << S, CircuitState, Gates, Uf_called >>
+vars == << CircuitState, Gates, Uf_called >>
 
 Init == (* Global variables *)
-        /\ S = << 1, 0, 0, 0 >>
         /\ CircuitState = << >>
         /\ Gates = {"hadamard1", "Uf", "swap", "not1"}
         /\ Uf_called = 0
 
-Next == /\ \E gate \in Gates:
-             /\ CircuitState' = Append(CircuitState, gate)
-             /\ IF gate = "Uf"
-                   THEN /\ Gates' = {"hadamard1", "swap", "not1"}
-                        /\ Uf_called' = Uf_called + 1
-                   ELSE /\ TRUE
-                        /\ UNCHANGED << Gates, Uf_called >>
-        /\ S' = S
+Next == \E gate \in Gates:
+          /\ CircuitState' = Append(CircuitState, gate)
+          /\ IF gate = "Uf"
+                THEN /\ Gates' = {"hadamard1", "swap", "not1"}
+                     /\ Uf_called' = Uf_called + 1
+                ELSE /\ TRUE
+                     /\ UNCHANGED << Gates, Uf_called >>
 
 Spec == Init /\ [][Next]_vars
 
 \* END TRANSLATION
 
-\*Invariant == ~(S[1] = 0 /\ S[2] = 2)
+Invariant == ~check_all(CircuitState, <<1,0,0,0>>)
 
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Jun 21 18:57:38 EDT 2018 by adampalay
+\* Last modified Mon Jun 25 16:34:26 EDT 2018 by adampalay
 \* Last modified Thu Jun 21 17:18:46 EDT 2018 by emanuel
 \* Created Wed Jun 20 15:31:47 EDT 2018 by adampalay
