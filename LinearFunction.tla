@@ -14,6 +14,7 @@ define
     compute(expr, x) == 
        CASE Head(expr) = "+" -> compute(expr[2], x) + compute(expr[3], x)
         [] Head(expr) = "*" -> compute(expr[2], x) * compute(expr[3], x)
+        [] Head(expr) = "-" -> compute(expr[2], x) - compute(expr[3], x)
         [] Head(expr) = "const" -> expr[2]
         [] Head(expr) = "var" /\ expr[2] = "x" -> x
         
@@ -21,14 +22,13 @@ end define;
 
 begin
 while TRUE do
-    with exprPair \in (possibleExpr \X possibleExpr) do
-        either
-            AST := << "*", exprPair[1], exprPair[2] >>;
-            possibleExpr := possibleExpr \union {AST};
-        or 
-            AST := << "+", exprPair[1], exprPair[2] >>;
-            possibleExpr := possibleExpr \union {AST};    
-        end either;
+    with expr1 \in possibleExpr do
+        with expr2 \in possibleExpr do
+            with op \in {"*", "+", "-"} do
+                AST := << op, expr1, expr2 >>;
+                possibleExpr := possibleExpr \union {AST};    
+            end with;
+        end with;
     end with;
 end while;
 
@@ -41,6 +41,7 @@ RECURSIVE compute(_, _)
 compute(expr, x) ==
    CASE Head(expr) = "+" -> compute(expr[2], x) + compute(expr[3], x)
     [] Head(expr) = "*" -> compute(expr[2], x) * compute(expr[3], x)
+    [] Head(expr) = "-" -> compute(expr[2], x) - compute(expr[3], x)
     [] Head(expr) = "const" -> expr[2]
     [] Head(expr) = "var" /\ expr[2] = "x" -> x
 
@@ -51,25 +52,26 @@ Init == (* Global variables *)
         /\ AST = << >>
         /\ possibleExpr = ({<<"const", x>> :x \in 1..3} \union {<<"var", "x">>})
 
-Next == \E exprPair \in (possibleExpr \X possibleExpr):
-          \/ /\ AST' = << "*", exprPair[1], exprPair[2] >>
-             /\ possibleExpr' = (possibleExpr \union {AST'})
-          \/ /\ AST' = << "+", exprPair[1], exprPair[2] >>
-             /\ possibleExpr' = (possibleExpr \union {AST'})
+Next == \E expr1 \in possibleExpr:
+          \E expr2 \in possibleExpr:
+            \E op \in {"*", "+", "-"}:
+              /\ AST' = << op, expr1, expr2 >>
+              /\ possibleExpr' = (possibleExpr \union {AST'})
 
 Spec == Init /\ [][Next]_vars
 
 \* END TRANSLATION
 
+\* can we compute x^2 -x + 1?
 Invariant == ~(
     /\ Len(AST) /= 0
-    /\ compute(AST, 1) = 4
-    /\ compute(AST, 2) = 7
-    /\ compute(AST, 3) = 12
+    /\ compute(AST, 1) = 1
+    /\ compute(AST, 2) = 3
+    /\ compute(AST, 3) = 7
 )
 
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Jun 28 11:11:15 EDT 2018 by adampalay
+\* Last modified Thu Jun 28 11:48:45 EDT 2018 by adampalay
 \* Created Wed Jun 20 15:31:47 EDT 2018 by adampalay
