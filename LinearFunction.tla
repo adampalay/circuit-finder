@@ -7,8 +7,7 @@ EXTENDS TLC, Naturals, Integers, Sequences
 
 variables
     AST = << >>;
-    SubASTs = { };
-    possibleExpr = SubASTs \union {<<"const", x>> :x \in 1..3} \union {<<"var", "x">>};
+    possibleExpr = {<<"const", x>> :x \in 1..3} \union {<<"var", "x">>};
 define
 
     RECURSIVE compute(_, _)
@@ -35,7 +34,7 @@ end while;
 
 end algorithm; *)
 \* BEGIN TRANSLATION
-VARIABLES AST, SubASTs, possibleExpr
+VARIABLES AST, possibleExpr
 
 (* define statement *)
 RECURSIVE compute(_, _)
@@ -46,33 +45,31 @@ compute(expr, x) ==
     [] Head(expr) = "var" /\ expr[2] = "x" -> x
 
 
-vars == << AST, SubASTs, possibleExpr >>
+vars == << AST, possibleExpr >>
 
 Init == (* Global variables *)
         /\ AST = << >>
-        /\ SubASTs = { }
-        /\ possibleExpr = (SubASTs \union {<<"const", x>> :x \in 1..3} \union {<<"var", "x">>})
+        /\ possibleExpr = ({<<"const", x>> :x \in 1..3} \union {<<"var", "x">>})
 
-Next == /\ \E exprPair \in (possibleExpr \X possibleExpr):
-             \/ /\ AST' = << "*", exprPair[1], exprPair[2] >>
-                /\ possibleExpr' = (possibleExpr \union {AST'})
-             \/ /\ AST' = << "+", exprPair[1], exprPair[2] >>
-                /\ possibleExpr' = (possibleExpr \union {AST'})
-        /\ UNCHANGED SubASTs
+Next == \E exprPair \in (possibleExpr \X possibleExpr):
+          \/ /\ AST' = << "*", exprPair[1], exprPair[2] >>
+             /\ possibleExpr' = (possibleExpr \union {AST'})
+          \/ /\ AST' = << "+", exprPair[1], exprPair[2] >>
+             /\ possibleExpr' = (possibleExpr \union {AST'})
 
 Spec == Init /\ [][Next]_vars
 
 \* END TRANSLATION
 
-Invariant == \/ Len(AST) = 0
-             \/ ~(
-                /\ compute(AST, 1) = 4
-                /\ compute(AST, 2) = 7
-                /\ compute(AST, 3) = 12
-                )
+Invariant == ~(
+    /\ Len(AST) /= 0
+    /\ compute(AST, 1) = 4
+    /\ compute(AST, 2) = 7
+    /\ compute(AST, 3) = 12
+)
 
 
 =============================================================================
 \* Modification History
-\* Last modified Wed Jun 27 22:26:21 EDT 2018 by adampalay
+\* Last modified Thu Jun 28 11:11:15 EDT 2018 by adampalay
 \* Created Wed Jun 20 15:31:47 EDT 2018 by adampalay
