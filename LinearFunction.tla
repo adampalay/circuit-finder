@@ -3,7 +3,7 @@
 EXTENDS TLC, Naturals, Integers, Sequences
 
 
-(* --algorithm computeFuntion
+(* --algorithm computeFunction
 
 variables
     AST = << >>;
@@ -16,8 +16,7 @@ define
        CASE Head(expr) = "+" -> compute(expr[2], x) + compute(expr[3], x)
         [] Head(expr) = "*" -> compute(expr[2], x) * compute(expr[3], x)
         [] Head(expr) = "const" -> expr[2]
-        [] Head(expr) = "var" /\ expr[2] = "x" -> x 
-
+        [] Head(expr) = "var" /\ expr[2] = "x" -> x
         
 end define;
 
@@ -29,7 +28,7 @@ while TRUE do
             possibleExpr := possibleExpr \union {AST};
         or 
             AST := << "+", exprPair[1], exprPair[2] >>;
-            possibleExpr := possibleExpr \union {AST};   
+            possibleExpr := possibleExpr \union {AST};    
         end either;
     end with;
 end while;
@@ -67,13 +66,13 @@ Spec == Init /\ [][Next]_vars
 
 Invariant == \/ Len(AST) = 0
              \/ ~(
-                /\ compute(AST, 1) = 3
-                /\ compute(AST, 2) = 6
-                /\ compute(AST, 3) = 11
+                /\ compute(AST, 1) = 4
+                /\ compute(AST, 2) = 7
+                /\ compute(AST, 3) = 12
                 )
 
 
 =============================================================================
 \* Modification History
-\* Last modified Wed Jun 27 22:20:38 EDT 2018 by adampalay
+\* Last modified Wed Jun 27 22:26:21 EDT 2018 by adampalay
 \* Created Wed Jun 20 15:31:47 EDT 2018 by adampalay
