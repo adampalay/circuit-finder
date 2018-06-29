@@ -1,4 +1,4 @@
------------------------------ MODULE LinearFunction -----------------------------
+----------------------------- MODULE LispFinder -----------------------------
 
 EXTENDS TLC, Naturals, Integers, Sequences
 
@@ -40,5 +40,5 @@ Invariant == ~(
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Jun 28 15:35:02 EDT 2018 by adampalay
+\* Last modified Fri Jun 29 17:42:09 EDT 2018 by adampalay
 \* Created Wed Jun 20 15:31:47 EDT 2018 by adampalay
