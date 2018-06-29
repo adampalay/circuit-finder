@@ -29,16 +29,16 @@ Next == \E expr1 \in possibleExpr:
 Spec == Init /\ [][Next]_vars
 
 
-\* can we compute x^2 +x + 1?
+\* can we compute x^3 + 2?
 Invariant == ~(
     /\ Len(AST) > 0
     /\ compute(AST, 1) = 3
-    /\ compute(AST, 2) = 7
-    /\ compute(AST, 3) = 13
+    /\ compute(AST, 2) = 10
+    /\ compute(AST, 3) = 29
 )
 
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Jun 28 12:27:53 EDT 2018 by adampalay
+\* Last modified Thu Jun 28 15:35:02 EDT 2018 by adampalay
 \* Created Wed Jun 20 15:31:47 EDT 2018 by adampalay
