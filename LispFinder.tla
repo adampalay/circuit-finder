@@ -59,7 +59,6 @@ Spec == Init /\ [][Next]_vars
 
 \* END TRANSLATION
 
-
 \* can we discover x^2 - 9?
 Invariant == ~(
     /\ Len(AST) > 0
@@ -68,8 +67,7 @@ Invariant == ~(
     /\ compute(AST, 3) = 0
 )
 
-
 =============================================================================
 \* Modification History
-\* Last modified Wed Jul 18 13:11:55 EDT 2018 by adampalay
+\* Last modified Wed Jul 18 13:34:17 EDT 2018 by adampalay
 \* Created Wed Jun 20 15:31:47 EDT 2018 by adampalay
