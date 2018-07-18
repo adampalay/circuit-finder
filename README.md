@@ -1,5 +1,5 @@
 # circuit-finder
-use tla+ to find circuits, classical or quantum :)
+use tla+ to synthesize lisp expressions and circuits (classical or quantum)
 
 [TLA+](http://lamport.azurewebsites.net/tla/tla.html) helps you check for bugs in the designs of your systems.
 The idea is you use TLA+ to specify your program as a state machine, then check to verify that certain undesireable
@@ -11,7 +11,11 @@ As you construct a program, line by line, you alter the "state" of the program y
 restricted programming language and have clear specifications, then presumably we can use TLA+ to construct
 programs from their specifications.
 
-This repo contains two examples of such generated programs. [XfromNAND](https://github.com/adampalay/circuit-finder/blob/master/XfromNAND.tla)
+This repo contains some examples of these generated programs.
+
+[LispFinder](https://github.com/adampalay/circuit-finder/blob/master/LispFinder.tla) searches a simplified space of Lisp programs of the type `Integer -> Integer` to synthesize programs from specifications. The current version of LispFinder discovers `x^2 + 1` from the specification that the inputs of `0`, `1`, and `2` should return `1`, `2`, and `5`, respectively. LispFinder is a proof of concept that at least simple programs can be generated from specification.
+
+[XfromNAND](https://github.com/adampalay/circuit-finder/blob/master/XfromNAND.tla)
 simulates classical chip construction. Starting with two input wires and only using NAND gates, XfromNAND can then
 be induced to construct any number of other logic gates. In this case, it implements an adder with a carry. But you can
 imagine changing [`Goal`](https://github.com/adampalay/circuit-finder/blob/master/XfromNAND.tla#L8) to the truth table
@@ -23,4 +27,4 @@ through specifying [available quantum gates](https://github.com/adampalay/circui
 and [the condition we want the algorithm to discover](https://github.com/adampalay/circuit-finder/blob/master/DeutschAlgorithm.tla#L65-L73).
 
 This approach to program generation generally isn't scalable, since TLA+ exhaustively searches the space of
-possible programs. But it works very well for these two examples!
+possible programs. But it works very well for these three examples!
