@@ -5,14 +5,15 @@ EXTENDS Integers, Sequences, TLC
 (*--algorithm LispFinder
 
 variables AST = << >>,
-        possibleExpr = ({<<"const", x>>: x \in 1..4} \union {<<"var", "x">>});
+          possibleExpr = ({<<"const", x>>: x \in 1..4}
+                          \union {<<"var", "x">>});
 
 define
-RECURSIVE compute(_, _)
-compute(expr, x) ==
-   CASE Head(expr) = "+" -> compute(expr[2], x) + compute(expr[3], x)
-    [] Head(expr) = "*" -> compute(expr[2], x) * compute(expr[3], x)
-    [] Head(expr) = "-" -> compute(expr[2], x) - compute(expr[3], x)
+RECURSIVE evaluate(_, _)
+evaluate(expr, x) ==
+   CASE Head(expr) = "+" -> evaluate(expr[2], x) + evaluate(expr[3], x)
+    [] Head(expr) = "*" -> evaluate(expr[2], x) * evaluate(expr[3], x)
+    [] Head(expr) = "-" -> evaluate(expr[2], x) - evaluate(expr[3], x)
     [] Head(expr) = "const" -> expr[2]
     [] Head(expr) = "var" /\ expr[2] = "x" -> x
 end define;
@@ -34,11 +35,11 @@ end algorithm--*)
 VARIABLES AST, possibleExpr
 
 (* define statement *)
-RECURSIVE compute(_, _)
-compute(expr, x) ==
-   CASE Head(expr) = "+" -> compute(expr[2], x) + compute(expr[3], x)
-    [] Head(expr) = "*" -> compute(expr[2], x) * compute(expr[3], x)
-    [] Head(expr) = "-" -> compute(expr[2], x) - compute(expr[3], x)
+RECURSIVE evaluate(_, _)
+evaluate(expr, x) ==
+   CASE Head(expr) = "+" -> evaluate(expr[2], x) + evaluate(expr[3], x)
+    [] Head(expr) = "*" -> evaluate(expr[2], x) * evaluate(expr[3], x)
+    [] Head(expr) = "-" -> evaluate(expr[2], x) - evaluate(expr[3], x)
     [] Head(expr) = "const" -> expr[2]
     [] Head(expr) = "var" /\ expr[2] = "x" -> x
 
@@ -47,7 +48,8 @@ vars == << AST, possibleExpr >>
 
 Init == (* Global variables *)
         /\ AST = << >>
-        /\ possibleExpr = ({<<"const", x>>: x \in 1..4} \union {<<"var", "x">>})
+        /\ possibleExpr = ({<<"const", x>>: x \in 1..4}
+                           \union {<<"var", "x">>})
 
 Next == \E expr1 \in possibleExpr:
           \E expr2 \in possibleExpr:
@@ -62,12 +64,12 @@ Spec == Init /\ [][Next]_vars
 \* can we discover x^2 + 1?
 Invariant == ~(
     /\ Len(AST) > 0
-    /\ compute(AST, 0) = 1
-    /\ compute(AST, 1) = 2
-    /\ compute(AST, 2) = 5
+    /\ evaluate(AST, 0) = 1
+    /\ evaluate(AST, 1) = 2
+    /\ evaluate(AST, 2) = 5
 )
 
 =============================================================================
 \* Modification History
-\* Last modified Wed Jul 18 15:01:40 EDT 2018 by adampalay
+\* Last modified Sun Jul 22 11:00:16 EDT 2018 by adampalay
 \* Created Wed Jun 20 15:31:47 EDT 2018 by adampalay
